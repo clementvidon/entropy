@@ -6,12 +6,9 @@
 
 ## Usage
 
-- Run `generate.py` to generate a set of numbers based on the ambient sound, the
-  entropy of the set is relative to the randomness of the sound recorded.
+Generate 24 words based on the `dic_7776` dictionary:
 
-- Run `measure.py` to calculate the distribution within the dataset.
+  `$ ./generate.py 24 | ./convert.py dictionaries/dic_7776`
 
-- Run `convert.py` to convert the numbers into words based on a dictionary,
-  following the Diceware method.
-
-- Run `entropy.py` to calculate the entropy of your pass phrase.
+- Use `measure.py` to calculate the distribution within a numbers dataset.
+- Use `entropy.py` to calculate the entropy of your pass phrase.

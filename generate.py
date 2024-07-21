@@ -1,11 +1,11 @@
+#!/usr/bin/env python3
 import sounddevice as sd
 import hashlib
 import pyaudio
 import numpy as np
 import argparse
 import time
-
-# TODO NIST Statistical Test Suite or Diehard tests.
+import sys
 
 DICE_MIN = 1
 DICE_MAX = 6
@@ -50,41 +50,42 @@ def generate_random_numbers(
         chunk = audio_data[i * chunk_size : (i + 1) * chunk_size]
         chunk_hash = hashlib.sha256(chunk).digest()
         hash_int = int.from_bytes(chunk_hash, byteorder="big", signed=False)
-        mapped_number = range_start + (hash_int % (range_end - range_start + 1))
-        if mapped_number > DICE_MAX:
-            mapped_number -= DICE_MAX
-        random_numbers.append(mapped_number)
+        for _ in range(num_size):
+            mapped_number = range_start + (hash_int % (range_end - range_start + 1))
+            hash_int //= 10
+            random_numbers.append(mapped_number)
 
-    return random_numbers
+    number_str = "".join(map(str, random_numbers[:num_size]))
+    return number_str
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate numbers based on ambient sound.")
+    parser = argparse.ArgumentParser(
+        description="Generate numbers based on ambient sound."
+    )
     parser.add_argument(
         "num_numbers", type=int, help="The number of random numbers to generate"
     )
     args = parser.parse_args()
 
     duration = 1  # seconds
-    num_numbers = args.num_numbers * NUM_SIZE
+    num_numbers = args.num_numbers
 
-    with open("numbers", "w") as f:
-        while num_numbers > 0:
-            frames = record_audio(duration)
-            if not has_sound_variations(frames):
-                print("Sound required for numbers generation")
-                time.sleep(1)
-                continue
+    all_numbers = []
+    while num_numbers > 0:
+        frames = record_audio(duration)
+        if not has_sound_variations(frames):
+            print("Numbers generation requires more sounds.", file=sys.stderr)
+            time.sleep(1)
+            continue
 
-            random_numbers = generate_random_numbers(
-                frames, num_size=min(NUM_SIZE, num_numbers)
-            )
-            for number in random_numbers:
-                f.write(f"{number}")
-            f.write("\n")
-            num_numbers -= len(random_numbers)
+        random_number = generate_random_numbers(frames)
+        all_numbers.append(random_number)
+        num_numbers -= 1
+
+    for number in all_numbers:
+        print(number)
 
 
 if __name__ == "__main__":
     main()
-    print("Numbers generated. See 'numbers' file.")
