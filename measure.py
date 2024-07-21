@@ -26,6 +26,7 @@ def main():
     # Print statistical measures
     print("Mean:", mean)
     print("Standard Deviation:", std_dev)
+    print("See: histogram.png")
 
     # Plot histogram
     plt.hist(numbers_array, bins=10, alpha=0.7, color="b", edgecolor="black")
